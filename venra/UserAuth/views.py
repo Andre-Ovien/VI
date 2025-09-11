@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import status
 from .models import User
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, LoginSerializer
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
@@ -31,4 +31,22 @@ class RegisterUserView(APIView):
                 'token': tokens
             },
             status = status.HTTP_201_CREATED
+        )
+    
+
+class LoginUserView(APIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        tokens = get_tokens_for_user(user)
+
+        return Response(
+            {
+                "user": LoginSerializer(user).data,
+                "tokens": tokens,
+            },
+            status= status.HTTP_200_OK
         )
